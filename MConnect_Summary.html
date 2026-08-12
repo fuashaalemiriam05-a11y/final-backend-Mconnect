@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>MConnect Summary</title>
+<style>
+body{font-family:Segoe UI,sans-serif;max-width:800px;margin:0 auto;padding:32px;background:#f9f9f9;color:#222}
+h1{color:#7c3aed;border-bottom:2px solid #7c3aed;padding-bottom:8px}
+h2{color:#333;margin-top:24px}
+h3{color:#7c3aed;margin-top:20px}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+td,th{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#7c3aed;color:white}
+tr:nth-child(even){background:#f2f2f2}
+ul{padding-left:20px}
+li{margin:4px 0}
+</style></head>
+<body>
+<h1>MConnect — Mentorship &amp; Networking Platform</h1>
+<p><strong>Technical Documentation Summary</strong></p>
+
+<h2>1. What the Website Is About</h2>
+<p><strong>MConnect</strong> is a full-stack mentorship and networking platform that connects mentors and mentees. It provides a professional social network experience (similar to LinkedIn) with features such as news feed, direct messaging, group chats, voice calls, stories, mentor profiles with reviews, session scheduling, and an admin dashboard. The platform supports both light and dark themes and is fully responsive on desktop and mobile.</p>
+
+<h2>2. Problem Statement</h2>
+<p>Many students, junior developers, and professionals struggle to find experienced mentors who can guide their career growth. Existing solutions are either informal (LinkedIn DMs, Twitter) or behind paywalls. There is no free, all-in-one platform that combines mentor discovery, messaging, session scheduling, social features (feed, stories, reactions), reviews, and admin oversight.</p>
+
+<h2>3. Solution</h2>
+<p><strong>MConnect</strong> provides a unified platform where any user can act as both mentor and mentee. The system uses a unified user role model — no separate tables for mentors/mentees. Features include JWT authentication, real-time messaging, Jitsi-powered voice calls, Prisma ORM with PostgreSQL, and a React + Vite frontend with Tailwind CSS.</p>
+
+<h2>4. Pages / Screens (25+)</h2>
+<table>
+<tr><th>Route</th><th>Description</th></tr>
+<tr><td>/</td><td>Welcome / Landing page</td></tr>
+<tr><td>/login</td><td>Login with password show/hide and forgot password link</td></tr>
+<tr><td>/signup</td><td>Registration page</td></tr>
+<tr><td>/forgot-password</td><td>Email-based password reset request</td></tr>
+<tr><td>/reset-password</td><td>Token-based password reset</td></tr>
+<tr><td>/feed</td><td>Social feed with posts, stories, reactions (public)</td></tr>
+<tr><td>/feed/new</td><td>Create a new post with file upload</td></tr>
+<tr><td>/posts/:id</td><td>Post detail view</td></tr>
+<tr><td>/posts/:id/comments</td><td>Nested comments on a post</td></tr>
+<tr><td>/mentors</td><td>Search and filter mentors by tags and rating</td></tr>
+<tr><td>/mentors/:id</td><td>Mentor profile with bio, expertise, reviews</td></tr>
+<tr><td>/mentors/:id/request</td><td>Send mentorship request</td></tr>
+<tr><td>/mentor-profile-setup</td><td>Edit own mentor profile</td></tr>
+<tr><td>/sessions/:id</td><td>View a scheduled session</td></tr>
+<tr><td>/messages</td><td>Chat inbox / conversation list</td></tr>
+<tr><td>/messages/:id</td><td>Direct message chat</td></tr>
+<tr><td>/messages/group/:id</td><td>Group chat with voice call button</td></tr>
+<tr><td>/groups/:id/edit</td><td>Edit group: rename, add/remove members, change icon</td></tr>
+<tr><td>/groups/:id/call</td><td>Voice call screen (Jitsi audio-only)</td></tr>
+<tr><td>/groups</td><td>Group list</td></tr>
+<tr><td>/groups/new</td><td>Create new group from accepted mentees</td></tr>
+<tr><td>/profile</td><td>User profile with photo upload, sessions, requests</td></tr>
+<tr><td>/settings</td><td>Notification preferences, appearance, change password, delete account</td></tr>
+<tr><td>/notifications</td><td>Notification history</td></tr>
+<tr><td>/admin</td><td>Admin dashboard: stats, users, activities, reports</td></tr>
+</table>
+
+<h2>5. API Endpoints</h2>
+<p>The backend runs on Express.js (port 3002). All endpoints return JSON. Protected endpoints require a JWT token (Bearer Auth).</p>
+
+<h3>Authentication (/api/auth)</h3>
+<ul>
+<li><strong>POST /signup</strong> — Register user. Returns user + JWT token.</li>
+<li><strong>POST /login</strong> — Login. Checks if suspended. Returns user + token.</li>
+<li><strong>POST /forgot-password</strong> — Sends reset email via Ethereal/SMTP. 1hr token expiry.</li>
+<li><strong>POST /reset-password</strong> — Validates token, hashes new password, marks used.</li>
+</ul>
+
+<h3>Users (/api/users)</h3>
+<ul>
+<li><strong>GET /me</strong> — Get current user profile.</li>
+<li><strong>GET /mentors</strong> — List mentors. Supports ?search, ?expertise, ?minRating.</li>
+<li><strong>GET /:id</strong> — Get user by ID.</li>
+<li><strong>GET /</strong> — List all users (public with optional auth).</li>
+<li><strong>PATCH /me</strong> — Update own profile (name, bio, avatar, expertise).</li>
+<li><strong>DELETE /me</strong> — Delete own account (cascading transaction).</li>
+<li><strong>PATCH /:id/password</strong> — Change password.</li>
+</ul>
+
+<h3>Posts (/api/posts)</h3>
+<ul>
+<li><strong>GET /</strong> — List posts with author, reactions, comment count, userReaction.</li>
+<li><strong>POST /</strong> — Create post (content, media).</li>
+<li><strong>GET /:id</strong> — Get post detail.</li>
+<li><strong>DELETE /:id</strong> — Delete own post.</li>
+<li><strong>POST /:id/reactions</strong> — Toggle reaction (one per user).</li>
+<li><strong>GET /:id/comments</strong> — Get comments with replies.</li>
+<li><strong>POST /:id/comments</strong> — Add comment (supports parentId for replies).</li>
+<li><strong>DELETE /comments/:id</strong> — Delete own comment.</li>
+</ul>
+
+<h3>Conversations &amp; Messages (/api/conversations)</h3>
+<ul>
+<li><strong>GET /</strong> — List conversations with last message preview.</li>
+<li><strong>POST /</strong> — Create conversation (direct or group).</li>
+<li><strong>GET /:id</strong> — Get conversation with participants.</li>
+<li><strong>PATCH /:id</strong> — Update group name/icon (multipart).</li>
+<li><strong>GET /:id/messages</strong> — Get all messages (ascending).</li>
+<li><strong>POST /:id/messages</strong> — Send message (text or file: image/voice/document).</li>
+<li><strong>PATCH /:id/read</strong> — Mark messages as read.</li>
+<li><strong>POST /:id/participants</strong> — Add group member.</li>
+<li><strong>DELETE /:id/participants/:userId</strong> — Remove group member.</li>
+</ul>
+
+<h3>Stories (/api/stories)</h3>
+<ul>
+<li><strong>GET /</strong> — Get non-expired stories (24h), grouped by user.</li>
+<li><strong>POST /</strong> — Create story (media or text).</li>
+<li><strong>DELETE /:id</strong> — Delete story (cascade comments).</li>
+<li><strong>POST /:id/comments</strong> — Add story comment.</li>
+<li><strong>DELETE /comments/:id</strong> — Delete story comment.</li>
+</ul>
+
+<h3>Reviews (/api/reviews)</h3>
+<ul>
+<li><strong>GET /mentor/:id</strong> — Get reviews for a mentor.</li>
+<li><strong>POST /</strong> — Create review (one per user per mentor).</li>
+<li><strong>PATCH /:id</strong> — Update own review.</li>
+<li><strong>DELETE /:id</strong> — Delete own review. Auto-recalculates mentor rating.</li>
+</ul>
+
+<h3>Admin (/api/admin)</h3>
+<ul>
+<li><strong>GET /stats</strong> — Platform statistics.</li>
+<li><strong>GET /activities</strong> — Recent activity feed.</li>
+<li><strong>GET /reports</strong> — All reports with reporter + target user.</li>
+<li><strong>PATCH /reports/:id</strong> — Update report status.</li>
+<li><strong>POST /reports</strong> — Submit report.</li>
+<li><strong>PATCH /users/:id/suspend</strong> — Toggle user suspension.</li>
+<li><strong>DELETE /users/:id</strong> — Admin delete user (cascade).</li>
+</ul>
+
+<h3>Other</h3>
+<ul>
+<li><strong>/api/mentorship-requests</strong> — CRUD mentorship requests.</li>
+<li><strong>/api/sessions</strong> — Manage mentorship sessions.</li>
+<li><strong>/api/notifications</strong> — Get and mark notifications read.</li>
+<li><strong>/api/uploads</strong> — File upload (images, audio, docs, max 25MB).</li>
+</ul>
+
+<h2>6. How Components Interact</h2>
+<p><strong>Architecture:</strong> Client-server. Frontend (React + Vite, port 5173) communicates with Backend (Express + Prisma + PostgreSQL, port 3002) via REST API. Vite proxies /api and /uploads to backend.</p>
+
+<p><strong>Frontend:</strong> React with component architecture. AuthContext provides user state globally. ThemeContext handles light/dark mode. All API calls go through api() helper which auto-attaches JWT. AppLayout wraps protected routes with DesktopSidebar + BottomNav.</p>
+
+<p><strong>Backend:</strong> Express.js with 12 route files. Prisma ORM with 16 database models. JWT authentication. Three middleware levels: authenticate (required), optionalAuth (public), adminOnly.</p>
+
+<p><strong>Example flow — Creating a post:</strong></p>
+<ol>
+<li>User types content / selects file on CreatePostScreen</li>
+<li>If file, uploadFile() sends to POST /api/uploads → returns server URL</li>
+<li>Post + media URL sent to POST /api/posts → creates DB record</li>
+<li>SocialFeedScreen fetches GET /api/posts → renders PostCard components</li>
+<li>Other users react (one per user), comment, or share</li>
+</ol>
+
+<p><strong>Example flow — Group voice call:</strong></p>
+<ol>
+<li>User clicks phone icon in GroupMessageScreen → navigates to /groups/:id/call</li>
+<li>GroupCallScreen loads Jitsi Meet API → creates audio-only room: mconnect-voice-{groupId}</li>
+<li>Other group members join same room URL — Jitsi handles peer-to-peer audio</li>
+<li>Hangup button disposes session and returns to group chat</li>
+</ol>
+
+<h2>7. Database Schema (16 Tables)</h2>
+<table>
+<tr><th>Table</th><th>Purpose</th></tr>
+<tr><td>users</td><td>Core user accounts (unified role — any user can be mentor)</td></tr>
+<tr><td>password_resets</td><td>Password reset tokens with 1hr expiry</td></tr>
+<tr><td>mentorship_requests</td><td>Mentorship requests between users</td></tr>
+<tr><td>sessions</td><td>Scheduled mentorship sessions</td></tr>
+<tr><td>availability</td><td>Mentor availability slots (unused in UI)</td></tr>
+<tr><td>posts</td><td>User posts with media support</td></tr>
+<tr><td>comments</td><td>Post comments with nested replies (parentId)</td></tr>
+<tr><td>post_reactions</td><td>Post reactions (one per user per post)</td></tr>
+<tr><td>conversations</td><td>Direct messages and group conversations</td></tr>
+<tr><td>conversation_participants</td><td>Many-to-many: users in conversations</td></tr>
+<tr><td>messages</td><td>Message content, type, attachment, read receipts</td></tr>
+<tr><td>notifications</td><td>In-app notifications with linkTo</td></tr>
+<tr><td>stories</td><td>24-hour expiring stories (text or media)</td></tr>
+<tr><td>story_comments</td><td>Comments on stories (cascade delete)</td></tr>
+<tr><td>reports</td><td>User reports for admin moderation</td></tr>
+<tr><td>reviews</td><td>Mentor reviews (one per user per mentor)</td></tr>
+</table>
+
+<h2>8. Key Technical Decisions</h2>
+<ul>
+<li><strong>Unified user role:</strong> No separate mentor/mentee tables — any user toggles mentor mode by completing their profile.</li>
+<li><strong>Prisma 7 + adapter-pg:</strong> Required for ESM compatibility. Connection string in prisma.config.ts.</li>
+<li><strong>JWT + optional auth:</strong> Public routes (feed, profiles) work without login.</li>
+<li><strong>Dark mode:</strong> CSS custom properties on :root and .dark class, persisted in localStorage.</li>
+<li><strong>File uploads:</strong> multer stores in backend/uploads/, served statically. Vite proxies /uploads.</li>
+<li><strong>Voice calls:</strong> Jitsi Meet external API in audio-only mode. No account required.</li>
+<li><strong>Password reset:</strong> crypto token stored in DB (1hr), sent via Ethereal test emails or SMTP.</li>
+<li><strong>Account deletion:</strong> Prisma transaction cascades — removes all user data atomically.</li>
+</ul>
+
+<h2>9. Tech Stack Summary</h2>
+<ul>
+<li><strong>Frontend:</strong> React 19, Vite 8, Tailwind CSS 4, React Router, Lucide React icons</li>
+<li><strong>Backend:</strong> Node.js, Express.js, Prisma 7, PostgreSQL 18, JWT, bcrypt, multer, nodemailer</li>
+<li><strong>External:</strong> Jitsi Meet (voice calls), Ethereal (test emails)</li>
+<li><strong>Auth:</strong> JWT (7-day expiry), stored in localStorage</li>
+<li><strong>Deployment:</strong> Vite dev server (port 5173) + Express API (port 3002)</li>
+</ul>
+
+<p style="margin-top:32px;color:#666;font-size:13px;text-align:center">MConnect Documentation — Generated July 2026</p>
+</body>
+</html>
