@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 const pool = new Pool({ connectionString: 'postgresql://postgres:Princesse@localhost:5432/mconnect' });
 
