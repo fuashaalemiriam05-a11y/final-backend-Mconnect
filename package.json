@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "start": "node server.js",
+    "postinstall": "npx prisma generate",
     "dev": "node server.js",
     "seed": "node seed.js",
     "migrate": "npx prisma migrate dev"
